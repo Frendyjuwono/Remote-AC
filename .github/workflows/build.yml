@@ -1,0 +1,44 @@
+name: Build APK
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rapikan folder
+        run: |
+          set -e
+          if [ ! -d app ]; then
+            mkdir -p app/src/main/java/id/frendy/remoteac app/src/main/assets app/src/main/res/drawable gradle/wrapper
+            for f in build.gradle*.kts; do
+              if grep -q "apply false" "$f"; then mv "$f" root.tmp; else mv "$f" app/build.gradle.kts; fi
+            done
+            mv root.tmp build.gradle.kts
+            mv *.kt app/src/main/java/id/frendy/remoteac/
+            mv AndroidManifest.xml app/src/main/
+            mv index.html app/src/main/assets/
+            mv ic_launcher.xml app/src/main/res/drawable/
+            mv gradle-wrapper.properties gradle/wrapper/
+          fi
+          find . -path ./.git -prune -o -type f -print
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+
+      - run: gradle assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RemoteAC-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
