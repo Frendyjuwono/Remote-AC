@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Remote AC Kamar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: calm, product-grade, like a shipped smart-home app
+   IDEA: the AC's own white indoor unit + its handheld remote
+   PICTURE: the indoor unit drawn large, louver & airflow live
+   COLOUR and TYPE: appliance white, Panasonic deep blue, ice cyan accent; Archivo
+   LAYOUT: unit + dial first, controls beside, energy, schedule, remote-access notes */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0a1428);--ink:light-dark(#0b1a33,#e9f1ff);--mut:light-dark(#5b6a80,#93a6c4);--blue:#0b3a8f;--deep:light-dark(#0b3a8f,#10285a);--ice:#2fc9f5;--line:light-dark(#e3e8ef,#1f3157);--card:light-dark(#f4f7fb,#111f3d);--warn:#ff5a36}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Archivo,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(24px,4vw,56px) max(5vw,16px)}
+.wrap{max-width:1180px;margin:0 auto}
+h1{font-size:clamp(30px,5vw,44px);line-height:1.05;margin:0;font-weight:800;text-wrap:balance}
+h2{font-size:24px;margin:0 0 4px;font-weight:800}
+.sub{color:var(--mut);margin:4px 0 0}
+.hero{background:var(--deep);color:#fff}
+.hero .sub{color:#b8c8ea}
+.top{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:end;margin-bottom:22px}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:99px;background:#ffffff1c;font-weight:700;white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:50%;background:#7d8aa3}.on .dot{background:var(--ice);box-shadow:0 0 12px var(--ice)}
+.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:clamp(18px,3vw,36px)}
+@media(max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
+.unit{width:100%;height:auto;display:block}
+.dial{display:flex;align-items:center;justify-content:center;gap:clamp(14px,4vw,34px);margin-top:10px}
+.temp{font-size:clamp(72px,14vw,118px);font-weight:800;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.temp small{font-size:.35em;vertical-align:top;margin-left:4px;color:#b8c8ea}
+.round{width:64px;height:64px;border-radius:50%;border:2px solid #ffffff55;background:#ffffff12;color:#fff;font-size:32px;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--ice);height:44px}
+.ticks{display:flex;justify-content:space-between;font-size:13px;color:#b8c8ea;margin-top:-6px}
+.panel{background:#ffffff10;border-radius:22px;padding:20px;display:grid;gap:18px;align-content:start}
+.lbl{font-size:14px;color:#b8c8ea;margin-bottom:8px;display:flex;justify-content:space-between}
+.seg{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.seg button,.chips button{min-height:44px;border-radius:12px;border:1px solid #ffffff33;background:transparent;color:#fff;font:600 15px Archivo,sans-serif;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--ice);color:#06213f;border-color:var(--ice)}
+.power{display:flex;align-items:center;gap:14px;width:100%;min-height:72px;border-radius:18px;border:0;cursor:pointer;font:800 20px Archivo,sans-serif;padding:0 20px;background:#fff;color:var(--blue)}
+.on .power{background:var(--warn);color:#fff}
+.power svg{width:34px;height:34px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{padding:0 14px}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--ice);outline-offset:2px}
+.note{font-size:13px;color:#b8c8ea;margin:0}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;margin:22px 0}
+@media(max-width:700px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.big{font-size:clamp(26px,4vw,38px);font-weight:800;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums}
+.k{color:var(--mut);font-size:14px}
+.chart{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;align-items:end;height:220px;border-bottom:2px solid var(--line);padding-top:24px}
+.col{display:flex;flex-direction:column;justify-content:end;height:100%;text-align:center}
+.bar{background:var(--blue);border-radius:8px 8px 0 0;min-height:3px;position:relative}
+:root:not([data-theme=light]) .bar{background:light-dark(var(--blue),var(--ice))}
+.bar.today{background:var(--ice)}
+.bar span{position:absolute;bottom:100%;left:0;right:0;font-size:13px;font-weight:700;padding-bottom:3px;white-space:nowrap}
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;text-align:center;font-size:13px;color:var(--mut);margin-top:6px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;margin-top:28px}
+@media(max-width:760px){.two{grid-template-columns:minmax(0,1fr)}}
+table{width:100%;border-collapse:collapse;font-size:15px}td,th{padding:9px 6px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--mut);font-weight:500;font-size:13px}
+td.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.form label{font-size:14px;color:var(--mut);display:grid;gap:4px}
+input,select{font:16px Archivo,sans-serif;min-height:44px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.btn{min-height:44px;padding:0 18px;border-radius:12px;border:0;background:var(--blue);color:#fff;font:700 15px Archivo,sans-serif;cursor:pointer}
+.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.dchips{display:flex;flex-wrap:wrap;gap:6px;grid-column:1/-1}
+.dchips button{min-width:44px;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 14px Archivo,sans-serif;cursor:pointer}
+.dchips button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
+.sched{list-style:none;padding:0;margin:0 0 18px}
+.sched li{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.sched .t{font-size:28px;font-weight:800;width:4.2ch;font-variant-numeric:tabular-nums}
+.sched .d{flex:1;color:var(--mut);font-size:14px}
+.sched .d b{color:var(--ink);font-size:16px}
+.sw{width:52px;height:30px;accent-color:var(--blue)}
+.x{background:none;border:0;color:var(--mut);font-size:22px;min-width:44px;min-height:44px;cursor:pointer}
+.alt{background:var(--card)}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:18px}
+@media(max-width:760px){.steps{grid-template-columns:minmax(0,1fr)}}
+.steps h3{margin:0 0 4px;font-size:18px}.steps p{margin:0;color:var(--mut)}
+.muted{color:var(--mut);font-size:13px}
+.flow{stroke-dasharray:10 14;animation:fl var(--sp,1.4s) linear infinite}
+@keyframes fl{to{stroke-dashoffset:-48}}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:#0b1a33;color:#fff;padding:12px 18px;border-radius:12px;opacity:0;transition:.25s;pointer-events:none;font-weight:600;z-index:9}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){.flow{animation:none}}
+</style>
+</head>
+<body>
+<section class="band hero" id="hero">
+<div class="wrap">
+  <div class="top">
+    <div><h1>AC Kamar</h1><p class="sub">Panasonic CS-YN9SKJ · 1 PK non-inverter · R32</p></div>
+    <span class="pill" id="pill"><span class="dot"></span><span id="pillTxt">Mati</span></span>
+  </div>
+  <div class="grid">
+    <div>
+      <svg class="unit" viewBox="0 0 420 190" aria-label="Unit indoor AC">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d9e1ec"/></linearGradient></defs>
+        <ellipse cx="210" cy="112" rx="190" ry="8" fill="#00000030"/>
+        <rect x="20" y="10" width="380" height="96" rx="22" fill="url(#g)"/>
+        <rect x="20" y="10" width="380" height="6" rx="3" fill="#ffffff"/>
+        <rect x="44" y="84" width="332" height="14" rx="7" fill="#1b2a44"/>
+        <text x="44" y="40" font-family="Archivo" font-weight="800" font-size="15" fill="#1b4aa8">Panasonic</text>
+        <circle cx="356" cy="38" r="4" id="led" fill="#9aa7bb"/>
+        <text x="346" y="43" text-anchor="end" font-family="Archivo" font-weight="700" font-size="14" fill="#1b2a44" id="ledT"></text>
+        <g id="louver" style="transform-origin:210px 92px;transition:transform .8s"><rect x="50" y="90" width="320" height="7" rx="3.5" fill="#f2f5f9"/></g>
+        <g id="air" stroke="#2fc9f5" stroke-width="4" fill="none" stroke-linecap="round" opacity="0">
+          <path class="flow" d="M90 112 C110 140 100 165 120 185"/><path class="flow" d="M160 112 C180 145 170 165 190 185"/>
+          <path class="flow" d="M230 112 C250 145 240 165 260 185"/><path class="flow" d="M300 112 C320 140 310 165 330 185"/>
+        </g>
+      </svg>
+      <div class="dial">
+        <button class="round" id="minus" aria-label="Turunkan suhu">−</button>
+        <div class="temp" id="temp">24<small>°C</small></div>
+        <button class="round" id="plus" aria-label="Naikkan suhu">+</button>
+      </div>
+      <input type="range" id="range" min="16" max="30" step="1" aria-label="Suhu">
+      <div class="ticks"><span>16°</span><span>20°</span><span>24°</span><span>27°</span><span>30°</span></div>
+    </div>
+    <div class="panel">
+      <button class="power" id="power"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.3 7.3a8 8 0 1 0 11.4 0"/></svg><span id="powTxt">Nyalakan</span></button>
+      <div><div class="lbl"><span>Kecepatan kipas</span><span id="fanL"></span></div><div class="seg" id="fan"></div></div>
+      <div><div class="lbl"><span>Air swing (arah flap)</span><span id="swL"></span></div><div class="seg" id="swing"></div></div>
+      <div><div class="lbl"><span>Matikan otomatis dalam</span><span id="offL"></span></div>
+        <div class="chips" id="offc"><button data-h="1">1 jam</button><button data-h="2">2 jam</button><button data-h="4">4 jam</button><button data-h="6">6 jam</button><button data-h="0">Batal</button></div></div>
+      <p class="note" id="irst">Memeriksa IR blaster…</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="band" id="energi">
+<div class="wrap">
+  <h2 id="eTitle">Pemakaian listrik</h2>
+  <p class="sub">Estimasi dari daya 1 PK non-inverter, suhu & kipas yang dipakai. Angka nyata butuh smart plug dengan pengukur daya.</p>
+  <div class="stats">
+    <div><div class="k">Menyala hari ini</div><div class="big" id="sRun">0j 0m</div></div>
+    <div><div class="k">Energi hari ini</div><div class="big" id="sKwh">0 kWh</div></div>
+    <div><div class="k">Biaya hari ini</div><div class="big" id="sRp">Rp 0</div></div>
+    <div><div class="k">Daya sekarang (est.)</div><div class="big" id="sW">0 W</div></div>
+  </div>
+  <div class="chart" id="chart"></div><div class="days" id="days"></div>
+  <p class="muted" id="sample"></p>
+  <div class="two">
+    <div>
+      <h2 style="font-size:19px">Riwayat nyala</h2>
+      <table><thead><tr><th>Waktu</th><th>Setelan</th><th class="n">Durasi</th><th class="n">kWh</th></tr></thead><tbody id="log"></tbody></table>
+    </div>
+    <div>
+      <h2 style="font-size:19px">Perkiraan bulan ini</h2>
+      <div class="big" id="month" style="margin:6px 0 2px">Rp 0</div><p class="k" id="monthK" style="margin:0 0 18px"></p>
+      <div class="form">
+        <label>Tarif PLN (Rp/kWh)<input type="number" id="tariff" step="0.01" min="0"></label>
+        <label>Daya AC (watt)<input type="number" id="rated" min="300" max="2000"></label>
+      </div>
+      <p class="muted">Default 800 W = daya seri YN 1 PK dari Panasonic. Tarif bisa diubah sesuai golongan rumahmu.</p>
+      <button class="btn ghost" id="clear">Hapus semua riwayat</button>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="band alt" id="jadwal">
+<div class="wrap">
+  <h2>Jadwal</h2>
+  <p class="sub" style="margin-bottom:14px">Tetap jalan walau aplikasi ditutup. Syaratnya: HP menyala, ujung atas HP menghadap AC, dan masih dalam jangkauan.</p>
+  <div class="two" style="margin-top:0">
+    <ul class="sched" id="sched"></ul>
+    <form class="form" id="sf">
+      <label>Jam<input type="time" id="fT" value="21:30" required></label>
+      <label>Aksi<select id="fA"><option value="on">Nyalakan</option><option value="off">Matikan</option></select></label>
+      <label>Suhu<select id="fS"></select></label>
+      <label>Kipas<select id="fF"><option value="0">Auto</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+      <div class="dchips" id="fD"></div>
+      <button class="btn" type="submit">Tambah jadwal</button>
+    </form>
+  </div>
+</div>
+</section>
+
+<section class="band" id="ir">
+<div class="wrap">
+  <h2>Pengaturan IR</h2>
+  <p class="sub">Kalau AC tidak merespons, ganti varian kode lalu tekan Tes. Pakai varian yang berhasil.</p>
+  <div class="form" style="max-width:560px;margin-top:14px">
+    <label>Varian kode Panasonic<select id="variant"><option value="0">A (standar)</option><option value="1">B (alternatif)</option></select></label>
+    <div style="display:flex;align-items:end"><button class="btn" id="test" type="button">Tes kirim sinyal</button></div>
+  </div>
+  <button class="btn ghost" id="exact" type="button" hidden style="margin-top:14px">Izinkan alarm tepat waktu (agar jadwal akurat)</button>
+  <p class="muted" style="margin-top:18px">Sinyal IR dari HP hanya bekerja di dalam ruangan dan harus mengarah langsung ke AC (sekitar 5–7 m). Untuk mengontrol dari luar rumah, tetap perlu IR blaster WiFi.</p>
+</div>
+</section>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+{
+const K='acRemoteV1',DN=['Min','Sen','Sel','Rab','Kam','Jum','Sab'],$=id=>document.getElementById(id);
+const rp=x=>'Rp '+Math.round(x).toLocaleString('id-ID'),hm=ms=>{const m=Math.floor(ms/6e4);return Math.floor(m/60)+'j '+(m%60)+'m'};
+const dk=t=>{const d=new Date(t);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+const p2=n=>String(n).padStart(2,'0'),clock=t=>{const d=new Date(t);return p2(d.getHours())+':'+p2(d.getMinutes())};
+let S=null;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
+if(!S){S={on:false,since:0,temp:24,fan:0,swing:0,sess:[],tariff:1444.70,watt:800,offAt:0,last:{},
+  sched:[{id:1,t:'21:30',a:'on',temp:24,fan:0,days:[0,1,2,3,4,5,6],en:true},{id:2,t:'05:00',a:'off',temp:24,fan:0,days:[0,1,2,3,4,5,6],en:true}]};
+  const base=new Date();base.setHours(0,0,0,0);
+  for(let i=6;i>=1;i--){const st=base.getTime()-i*864e5+(21.5+(i%3)*.5)*36e5,hrs=6+(i*7%4);S.sess.push({start:st,end:st+hrs*36e5,temp:24+(i%2),fan:2+(i%2),sample:true})}}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const A=window.Android||null;if(S.variant==null)S.variant=0;
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>e.classList.remove('show'),1600)}
+function tx(){if(!A){toast('Mode demo (buka lewat aplikasi Android)');return}let ok=false;try{ok=A.send(S.on,S.temp,S.fan,S.swing,S.variant)}catch(e){}toast(ok?'Sinyal terkirim':'Gagal kirim — cek IR blaster')}
+function sync(){if(A)try{A.sync(JSON.stringify({sched:S.sched,offAt:S.offAt||0,swing:S.swing,variant:S.variant,temp:S.temp,fan:S.fan}))}catch(e){}}
+function applyEvents(){if(!A)return;let ev=[];try{ev=JSON.parse(A.takeEvents()||'[]')}catch(e){}
+  for(const e of ev){if(e.a==='on'){if(!S.on){S.on=true;S.since=e.ts}else if(e.ts-S.since>3e4){S.sess.push({start:S.since,end:e.ts,temp:S.temp,fan:S.fan});S.since=e.ts}S.temp=e.temp;S.fan=e.fan}
+    else{if(S.on){if(e.ts-S.since>3e4)S.sess.push({start:S.since,end:e.ts,temp:S.temp,fan:S.fan});S.on=false}S.offAt=0}}
+  if(ev.length){save();ui()}}
+const watt=(t,f)=>{const d=Math.min(.96,Math.max(.4,.4+(30-t)*.04));return Math.round((f?20+f*6:38)+d*(S.watt-60))};
+const seg=()=>{if(S.on){const n=Date.now();if(n-S.since>3e4)S.sess.push({start:S.since,end:n,temp:S.temp,fan:S.fan});S.since=n}};
+function setPower(on,silent){if(on===S.on&&!silent){tx();return}if(on===S.on)return;if(on){S.on=true;S.since=Date.now()}else{seg();S.on=false;S.offAt=0}save();if(!silent)tx();sync();ui()}
+function set(k,v){if(S[k]===v)return;seg();S[k]=v;save();if(S.on)tx();sync();ui()}
+function all(){const a=S.sess.slice();if(S.on)a.push({start:S.since,end:Date.now(),temp:S.temp,fan:S.fan,live:true});return a}
+function perDay(){const m={};for(const s of all()){let a=s.start;while(a<s.end){const d=new Date(a);d.setHours(24,0,0,0);const b=Math.min(s.end,d.getTime()),k=dk(a);m[k]=m[k]||{ms:0,kwh:0};m[k].ms+=b-a;m[k].kwh+=(b-a)/36e5*watt(s.temp,s.fan)/1000;a=b}}return m}
+function ui(){
+  document.body.classList.toggle('on',S.on);$('pill').classList.toggle('on',S.on);
+  $('pillTxt').textContent=S.on?'Menyala · '+S.temp+'°C':'Mati';$('powTxt').textContent=S.on?'Matikan':'Nyalakan';
+  $('temp').firstChild.nodeValue=S.temp;$('range').value=S.temp;
+  $('led').setAttribute('fill',S.on?'#2fc9f5':'#9aa7bb');$('ledT').textContent=S.on?S.temp+'°':'';
+  $('air').setAttribute('opacity',S.on?1:0);$('air').style.setProperty('--sp',(S.fan?2.2-S.fan*.36:1.2)+'s');
+  const ang=S.swing?[0,4,12,20,28,36][S.swing]:20;  $('louver').style.transform=S.on?'translateY('+(ang/6)+'px) skewY(0)':'';
+  $('louver').querySelector('rect').setAttribute('height',S.on?7+ang/4:7);
+  const segb=(id,cur,f)=>$(id).innerHTML=['Auto',1,2,3,4,5].map((l,i)=>'<button data-v="'+i+'" aria-pressed="'+(i===cur)+'">'+l+'</button>').join('');
+  segb('fan',S.fan);segb('swing',S.swing);
+  $('fanL').textContent=S.fan?'Level '+S.fan:'Auto';$('swL').textContent=S.swing?'Posisi '+S.swing:'Auto (mengayun)';
+  $('offL').textContent=S.offAt?'mati pukul '+clock(S.offAt):'';
+  $('tariff').value=S.tariff;$('rated').value=S.watt;
+  stats();sched();
+}
+function stats(){
+  const m=perDay(),now=Date.now(),t=m[dk(now)]||{ms:0,kwh:0};
+  $('sRun').textContent=hm(t.ms);$('sKwh').textContent=t.kwh.toFixed(2)+' kWh';$('sRp').textContent=rp(t.kwh*S.tariff);
+  $('sW').textContent=(S.on?watt(S.temp,S.fan):0)+' W';
+  const ds=[];for(let i=6;i>=0;i--)ds.push(now-i*864e5);
+  const vals=ds.map(d=>m[dk(d)]||{ms:0,kwh:0}),mx=Math.max(1,...vals.map(v=>v.kwh));
+  $('chart').innerHTML=vals.map((v,i)=>'<div class="col"><div class="bar'+(i===6?' today':'')+'" style="height:'+(v.kwh/mx*88)+'%"><span>'+v.kwh.toFixed(1)+'</span></div></div>').join('');
+  $('days').innerHTML=ds.map((d,i)=>'<div>'+(i===6?'Hari ini':DN[new Date(d).getDay()])+'<br>'+hm(vals[i].ms)+'</div>').join('');
+  const used=vals.filter(v=>v.kwh>0),avg=used.length?used.reduce((a,v)=>a+v.kwh,0)/used.length:0;
+  $('month').textContent=rp(avg*30*S.tariff);$('monthK').textContent='≈ '+(avg*30).toFixed(0)+' kWh/bulan dari rata-rata '+avg.toFixed(1)+' kWh per hari pakai';
+  $('sample').textContent=S.sess.some(s=>s.sample)?'6 hari sebelumnya adalah data contoh; akan tergantikan oleh pemakaianmu sendiri.':'';
+  $('log').innerHTML=all().slice(-6).reverse().map(s=>'<tr><td>'+DN[new Date(s.start).getDay()]+' '+clock(s.start)+(s.live?' · sekarang':'')+'</td><td>'+s.temp+'°C · '+(s.fan?'kipas '+s.fan:'auto')+'</td><td class="n">'+hm(s.end-s.start)+'</td><td class="n">'+((s.end-s.start)/36e5*watt(s.temp,s.fan)/1000).toFixed(2)+'</td></tr>').join('')||'<tr><td colspan="4" class="muted">Belum ada pemakaian.</td></tr>';
+}
+let fd=[0,1,2,3,4,5,6];
+function sched(){
+  $('sched').innerHTML=S.sched.length?S.sched.slice().sort((a,b)=>a.t<b.t?-1:1).map(s=>'<li><span class="t">'+s.t+'</span><span class="d"><b>'+(s.a==='on'?'Nyala '+s.temp+'°C':'Matikan')+'</b><br>'+(s.days.length===7?'Setiap hari':s.days.map(d=>DN[d]).join(', '))+'</span><input type="checkbox" class="sw" data-tg="'+s.id+'" aria-label="Aktif"'+(s.en?' checked':'')+'><button class="x" data-del="'+s.id+'" aria-label="Hapus">×</button></li>').join(''):'<li class="muted">Belum ada jadwal.</li>';
+  $('fD').innerHTML=[1,2,3,4,5,6,0].map(d=>'<button type="button" data-d="'+d+'" aria-pressed="'+fd.includes(d)+'">'+DN[d]+'</button>').join('');
+}
+$('fS').innerHTML=Array.from({length:15},(_,i)=>'<option'+(i+16===24?' selected':'')+'>'+(i+16)+'</option>').join('');
+$('minus').onclick=()=>S.temp>16&&set('temp',S.temp-1);$('plus').onclick=()=>S.temp<30&&set('temp',S.temp+1);
+$('range').oninput=e=>set('temp',+e.target.value);
+$('power').onclick=()=>setPower(!S.on);
+$('fan').onclick=e=>{const b=e.target.closest('button');if(b)set('fan',+b.dataset.v)};
+$('swing').onclick=e=>{const b=e.target.closest('button');if(b)set('swing',+b.dataset.v)};
+$('offc').onclick=e=>{const b=e.target.closest('button');if(!b)return;const h=+b.dataset.h;if(h&&!S.on)setPower(true);S.offAt=h?Date.now()+h*36e5:0;save();sync();ui();toast(h?'AC mati otomatis dalam '+h+' jam':'Timer dibatalkan')};
+$('tariff').onchange=e=>{S.tariff=Math.max(0,+e.target.value||0);save();stats()};
+$('rated').onchange=e=>{S.watt=Math.min(2000,Math.max(300,+e.target.value||800));save();stats()};
+$('clear').onclick=e=>{if(e.target.dataset.ok){S.sess=[];if(S.on)S.since=Date.now();save();ui();e.target.textContent='Hapus semua riwayat';delete e.target.dataset.ok}else{e.target.dataset.ok=1;e.target.textContent='Yakin? Ketuk lagi'}};
+$('fD').onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=+b.dataset.d;fd=fd.includes(d)?fd.filter(x=>x!==d):fd.concat(d);sched()};
+$('sf').onsubmit=e=>{e.preventDefault();if(!fd.length)return;S.sched.push({id:Date.now(),t:$('fT').value,a:$('fA').value,temp:+$('fS').value,fan:+$('fF').value,days:fd.slice(),en:true});save();sync();sched();toast('Jadwal ditambahkan')};
+$('sched').onclick=e=>{const t=e.target;if(t.dataset.del){S.sched=S.sched.filter(s=>s.id!=t.dataset.del);save();sync();sched()}if(t.dataset.tg){const s=S.sched.find(s=>s.id==t.dataset.tg);s.en=t.checked;save();sync()}};
+function tick(){const n=Date.now(),d=new Date(n),hh=clock(n),key=dk(n);
+  if(A){applyEvents();stats();return}
+  if(S.offAt&&n>=S.offAt)setPower(false);
+  for(const s of S.sched){if(s.en&&s.t===hh&&s.days.includes(d.getDay())&&S.last[s.id]!==key+hh){S.last[s.id]=key+hh;if(s.a==='on'){seg();S.temp=s.temp;S.fan=s.fan;setPower(true)}else setPower(false);save();ui()}}
+  stats()}
+$('variant').value=S.variant;$('variant').onchange=e=>{S.variant=+e.target.value;save();sync();toast('Varian '+(S.variant?'B':'A')+' dipilih — tekan Tes')};
+$('test').onclick=()=>tx();
+$('irst').textContent=A?(A.hasIr()?'IR blaster siap. Arahkan ujung atas HP ke AC.':'HP ini tidak punya IR blaster.'):'Mode demo di browser. Buka lewat aplikasi Android untuk mengontrol AC.';
+if(A&&!A.exactOk()){$('exact').hidden=false;$('exact').onclick=()=>A.askExact()}
+window.onNative=()=>{applyEvents();if(A&&A.exactOk())$('exact').hidden=true};
+applyEvents();sync();ui();setInterval(tick,1000);
+}
+</script>
+</body>
+</html>
